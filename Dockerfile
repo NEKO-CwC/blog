@@ -1,5 +1,5 @@
 # --- 阶段一：构建环境 ---
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
