@@ -3,7 +3,7 @@ name: Deploy Blog to K8s
 on:
   push:
     branches:
-      - main # 只有在推送到 main 分支时触发
+      - master # 只有在推送到 main 分支时触发
 
 jobs:
   build-and-deploy:
