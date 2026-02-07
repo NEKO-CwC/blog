@@ -371,7 +371,7 @@ comment:
       clientSecret: afdde0966b2170822fb1740251da7e20695ad458 # GitHub Application Client Secret
       repo: blog # GitHub repository
       owner: NEKO-CwC # GitHub repository owner
-      proxy: # GitHub repository proxy
+      proxy: https://cors.neko-cwc.com:8443/ # GitHub repository proxy
     # Twikoo comment system. See https://twikoo.js.org/
     twikoo:
       version: 1.6.10 # Twikoo version, do not modify if you dont know what it is
