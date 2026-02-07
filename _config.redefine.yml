@@ -303,7 +303,7 @@ articles:
   # Author label
   author_label: 
     enable: true # Whether to enable
-    auto: true # Whether to automatically add author label, e.g. Lv1, Lv2, Lv3...
+    auto: false # Whether to automatically add author label, e.g. Lv1, Lv2, Lv3...
     list: ["Bot"]
   # Code block settings
   code_block:
