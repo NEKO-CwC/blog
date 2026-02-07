@@ -31,7 +31,7 @@ jobs:
           GH_PAT: ${{ secrets.GH_PAT }}
         run: |
           npm install axios glob
-          node scripts/gitalk-init.js
+          node ci/gitalk-init.js
 
       # 4. Login to Docker Hub
       - name: Login to Docker Hub
@@ -58,5 +58,4 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # 使用最新的 SHA 标签精确更新，实现滚动发布
-            kubectl set image deployment/blog blog-container=${{ secrets.DOCKER_USERNAME }}/blog:${{ github.sha }} -n neko-cwc-service
+            kubectl rollout restart deployment/blog -n neko-cwc-service
