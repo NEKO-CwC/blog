@@ -27,6 +27,7 @@
     "hexo-server": "^3.0.0",
     "hexo-theme-landscape": "^1.0.0",
     "hexo-theme-redefine": "^2.8.5",
-    "mime": "^3.0.0"
+    "mime": "^3.0.0",
+    "picomatch": "^4.0.3"
   }
 }
