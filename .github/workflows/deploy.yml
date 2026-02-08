@@ -22,7 +22,8 @@ jobs:
 
       - name: Hexo Generate
         run: |
-          npm ci
+          npm install
+          npm install hexo-deployer-aws-s3
           npx hexo generate
 
       # 3. Initialize Gitalk Issues
