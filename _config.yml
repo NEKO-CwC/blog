@@ -110,3 +110,17 @@ theme: redefine
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: ''
+
+# _config.yml
+cdn_url: https://cdn.blog.220181.xyz
+
+deploy:
+  type: s3
+  bucket: blog-image-assets
+  endpoint: https://1c3ca43dfee775f2845582d07bc4a1c9.r2.cloudflarestorage.com
+  region: auto
+  aws_key: '' # Will be read from Environment Variable AWS_ACCESS_KEY_ID or similar if supported, specific plugin requires env config in CI
+  aws_secret: ''
+  concurrency: 20
+  delete_removed: false # Safer to keep old assets for a bit
+  prefix: '' # Upload to root
