@@ -18,25 +18,27 @@ hexo.extend.filter.register('after_render:html', function (str, data) {
   console.log(`[CDN Filter] Processing: ${data.path || 'unknown path'}`);
 
   const processImage = (element) => {
-    let src = $(element).attr('src');
-    if (!src) return;
+    const attrs = ['src', 'data-src'];
 
-    // 1. Convert absolute site URLs to relative first
-    // e.g. https://blog.neko-cwc.com:8443/posts/xyz -> /posts/xyz
-    if (src.startsWith(siteUrl)) {
-      src = src.substring(siteUrl.length);
-    }
+    attrs.forEach(attr => {
+      let val = $(element).attr(attr);
+      if (!val) return;
 
-    // 2. Identify keys to replace
-    // Matches /assets/... or /posts/...
-    if (src.startsWith('/assets/') || src.startsWith('/posts/')) {
-      const finalCdn = cdnUrl.endsWith('/') ? cdnUrl.slice(0, -1) : cdnUrl;
-      const newSrc = finalCdn + src;
+      // 1. Convert absolute site URLs to relative first
+      if (val.startsWith(siteUrl)) {
+        val = val.substring(siteUrl.length);
+      }
 
-      console.log(`  [Replace] ${src} -> ${newSrc}`);
-      $(element).attr('src', newSrc);
-      hasChanges = true;
-    }
+      // 2. Identify keys to replace
+      if (val.startsWith('/assets/') || val.startsWith('/posts/') || val.startsWith('/images/')) {
+        const finalCdn = cdnUrl.endsWith('/') ? cdnUrl.slice(0, -1) : cdnUrl;
+        const newVal = finalCdn + val;
+
+        console.log(`  [Replace] (${attr}) ${val} -> ${newVal}`);
+        $(element).attr(attr, newVal);
+        hasChanges = true;
+      }
+    });
   };
 
   $('img').each(function () {
