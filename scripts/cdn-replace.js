@@ -1,37 +1,46 @@
 'use strict';
 
 const cheerio = require('cheerio');
-const url = require('url');
 
 // Filter hooks into the 'after_render:html' event
 hexo.extend.filter.register('after_render:html', function (str, data) {
   const cdnUrl = this.config.cdn_url;
-  if (!cdnUrl) return str;
+  const siteUrl = this.config.url.replace(/\/+$/, ''); // Remove trailing slash
+
+  if (!cdnUrl) {
+    console.log('[CDN Filter] No cdn_url found in config.');
+    return str;
+  }
 
   const $ = cheerio.load(str, { decodeEntities: false });
   let hasChanges = false;
 
-  // 1. Replace Global Assets (/assets/...)
-  $('img[src^="/assets/"]').each(function () {
-    const src = $(this).attr('src');
-    // Replace /assets/ with CDN_URL/assets/
-    // We trim the leading slash from src to append to cdnUrl (which usually doesn't have trailing slash)
-    // Actually, safest is new URL(src, cdnUrl).href but src is relative to root.
-    // Let's assume cdnUrl is "https://cdn.example.com" and src is "/assets/img.png"
-    // Result: "https://cdn.example.com/assets/img.png"
+  console.log(`[CDN Filter] Processing: ${data.path || 'unknown path'}`);
 
-    // Check if cdnUrl ends with / to avoid double slash
-    const finalCdn = cdnUrl.endsWith('/') ? cdnUrl.slice(0, -1) : cdnUrl;
-    $(this).attr('src', finalCdn + src);
-    hasChanges = true;
-  });
+  const processImage = (element) => {
+    let src = $(element).attr('src');
+    if (!src) return;
 
-  // 2. Replace Post Assets (/posts/:id/...)
-  $('img[src^="/posts/"]').each(function () {
-    const src = $(this).attr('src');
-    const finalCdn = cdnUrl.endsWith('/') ? cdnUrl.slice(0, -1) : cdnUrl;
-    $(this).attr('src', finalCdn + src);
-    hasChanges = true;
+    // 1. Convert absolute site URLs to relative first
+    // e.g. https://blog.neko-cwc.com:8443/posts/xyz -> /posts/xyz
+    if (src.startsWith(siteUrl)) {
+      src = src.substring(siteUrl.length);
+    }
+
+    // 2. Identify keys to replace
+    // Matches /assets/... or /posts/...
+    if (src.startsWith('/assets/') || src.startsWith('/posts/')) {
+      const finalCdn = cdnUrl.endsWith('/') ? cdnUrl.slice(0, -1) : cdnUrl;
+      const newSrc = finalCdn + src;
+
+      console.log(`  [Replace] ${src} -> ${newSrc}`);
+      $(element).attr('src', newSrc);
+      hasChanges = true;
+    }
+  };
+
+  $('img').each(function () {
+    processImage(this);
   });
 
   return hasChanges ? $.html() : str;
