@@ -106,11 +106,6 @@ ignore:
 ## Themes: https://hexo.io/themes/
 theme: redefine
 
-# Deployment
-## Docs: https://hexo.io/docs/one-command-deployment
-deploy:
-  type: ''
-
 # _config.yml
 cdn_url: https://cdn.blog.220181.xyz
 
