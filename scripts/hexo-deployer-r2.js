@@ -108,36 +108,11 @@ hexo.extend.deployer.register('r2', async function (args) {
   }
 
   // 3. Identify files to delete (Remaining in remoteObjects)
-  // ONLY delete files that match the pattern logic? 
-  // R2 listObjects lists EVERYTHING. If we only sync images, we shouldn't delete HTML files we didn't check.
-  // HOWEVER, the user said "If there are unneeded ones, automatically delete them".
-  // BUT we are using a filter pattern now. 
-  // SAFEGUARD: We should only delete files that *would* have been matched by the pattern but are missing locally.
-  // This is hard to check perfectly on remote keys without re-running glob matcher on keys.
-  // SIMPLIFICATION: We assume 'prefix' effectively isolates this deployment or the user understands 'sync'.
-  // BETTER SAFEGUARD: Filter remoteObjects keys against the glob pattern (using micromatch/minimatch logic if needed, 
-  // or just fast-glob's matcher if possible, but fast-glob works on FS).
-  // For now, let's delete everything in 'prefix' that wasn't matched, IF we are sure.
-  // Wait, if pattern is `**/*.{png...}`, we shouldn't delete `index.html`.
-  // So we must filter `remoteObjects` keys to only those matching `pattern` before marking for deletion.
-
-  const micromatch = require('picomatch'); // hexo depends on micromatch/picomatch usually? 
-  // hexo-deployer-aws-s3 didn't use it. 'fast-glob' is already here.
-  // fast-glob uses 'micromatch' internally.
-  const isMatch = micromatch(pattern);
-
+  // All objects remaining in remoteObjects are not present locally (or handled locally)
+  // Since we want to sync the bucket to exactly match local files (and remove obsolete ones),
+  // we delete everything remaining.
   for (const [key] of remoteObjects) {
-    // Check if the remote key (relative to prefix) matches the pattern
-    // We need to strip prefix for pattern matching if prefix exists
-    let relativeKey = key;
-    if (prefix && key.startsWith(prefix)) {
-      relativeKey = key.slice(prefix.length);
-      if (relativeKey.startsWith('/')) relativeKey = relativeKey.slice(1);
-    }
-
-    if (isMatch(relativeKey)) {
-      toDelete.push({ Key: key });
-    }
+    toDelete.push({ Key: key });
   }
 
   console.log(`[R2 Sync] Summary: ${toUpload.length} to upload, ${toDelete.length} to delete, ${localFiles.length - toUpload.length} unchanged.`);
