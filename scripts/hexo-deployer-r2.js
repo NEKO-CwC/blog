@@ -157,3 +157,45 @@ hexo.extend.deployer.register('r2', async function (args) {
 
   console.log('[R2 Sync] Synchronization completed.');
 });
+
+// Register console command 'clean-assets'
+hexo.extend.console.register('clean-assets', 'Delete assets that matches deploy pattern from public dir', async function (args) {
+  let deployConfig = this.config.deploy;
+
+  if (Array.isArray(deployConfig)) {
+    // Find the r2 deployer configuration
+    deployConfig = deployConfig.find(d => d.type === 'r2');
+  }
+
+  if (!deployConfig || deployConfig.type !== 'r2') {
+    console.log('[Clean Assets] No R2 deployer config found.');
+    return;
+  }
+
+  const pattern = deployConfig.pattern;
+  if (!pattern) {
+    console.log('[Clean Assets] No pattern configured for R2 deployer. Skipping clean.');
+    return;
+  }
+
+  console.log(`[Clean Assets] Cleaning files matching: ${pattern}`);
+  const publicDir = this.public_dir;
+  const files = await fg(pattern, { cwd: publicDir, absolute: true });
+
+  if (files.length === 0) {
+    console.log('[Clean Assets] No matching files found to clean.');
+    return;
+  }
+
+  let deletedCount = 0;
+  for (const file of files) {
+    try {
+      fs.unlinkSync(file);
+      deletedCount++;
+    } catch (e) {
+      console.error(`[Clean Assets] Failed to delete ${file}:`, e.message);
+    }
+  }
+
+  console.log(`[Clean Assets] Successfully deleted ${deletedCount} files.`);
+});
