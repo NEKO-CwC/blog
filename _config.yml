@@ -111,6 +111,7 @@ cdn_url: https://cdn.blog.220181.xyz
 
 deploy:
   type: r2
+  pattern: '**/*.{png,jpg,jpeg,gif,webp,svg,ico,mp4}'
   bucket: blog-image-assets
   endpoint: https://1c3ca43dfee775f2845582d07bc4a1c9.r2.cloudflarestorage.com
   region: auto

@@ -15,7 +15,8 @@ hexo.extend.deployer.register('r2', async function (args) {
     prefix = '',
     aws_key,
     aws_secret,
-    concurrency = 20
+    concurrency = 20,
+    pattern = '**/*'
   } = args;
 
   if (!bucket || !endpoint) {
@@ -54,7 +55,7 @@ Example:
   });
 
   const publicDir = this.public_dir;
-  const files = await fg('**/*', { cwd: publicDir, onlyFiles: true });
+  const files = await fg(pattern, { cwd: publicDir, onlyFiles: true });
 
   console.log(`[R2 Deploy] Found ${files.length} files to upload.`);
 
