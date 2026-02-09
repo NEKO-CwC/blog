@@ -107,7 +107,7 @@ ignore:
 theme: redefine
 
 # _config.yml
-cdn_url: https://cdn.blog.220181.xyz
+cdn_url: https://proxy.220181.xyz/https://cdn.blog.220181.xyz
 
 deploy:
   type: r2
