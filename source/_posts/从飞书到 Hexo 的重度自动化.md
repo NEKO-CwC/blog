@@ -1,6 +1,17 @@
 ---
 title: 从飞书到 Hexo 的重度自动化
 abbrlink: a8557e90
+categories:
+  - [日记, 分享]
+tags:
+  - 工程化
+  - k8s
+  - 计算机网络
+  - Hexo
+  - Redefine
+  - Cloudflare
+  - s3 存储
+  - nginx
 ---
 
 

@@ -1,6 +1,9 @@
 ---
 title: 'CHANGELOG'
 abbrlink: '0'
+categories:
+  - 基础建设
+  - 时间线
 ---
 
 (2026.02.10)

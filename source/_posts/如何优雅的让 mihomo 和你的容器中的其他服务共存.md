@@ -1,6 +1,13 @@
 ---
 title: 如何优雅的让 mihomo 和你的容器中的其他服务共存
 abbrlink: 357b852e
+categories:
+  - [笔记, 教程]
+tags:
+  - 计算机网络
+  - 科学上网
+  - mihomo
+  - linux
 ---
 
 
