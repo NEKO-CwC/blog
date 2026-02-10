@@ -12,6 +12,8 @@ jobs:
       # 1. 拉取源码
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # 2. Setup Node and Generate Hexo Site
       - name: Setup Node
