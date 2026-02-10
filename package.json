@@ -17,6 +17,7 @@
     "fast-glob": "^3.3.3",
     "hexo": "^8.0.0",
     "hexo-abbrlink": "^2.2.1",
+    "hexo-filter-date-from-git": "^0.2.0",
     "hexo-generator-archive": "^2.0.0",
     "hexo-generator-category": "^2.0.0",
     "hexo-generator-index": "^4.0.0",
