@@ -1,0 +1,5 @@
+# Local Development Configuration
+# Overrides _config.yml settings for local development
+
+# Disable CDN to use local assets
+cdn_url: ''
