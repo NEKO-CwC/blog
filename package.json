@@ -13,7 +13,7 @@
     "version": "8.1.1"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.985.0",
+    "@aws-sdk/client-s3": "^3.990.0",
     "cheerio": "^1.2.0",
     "fast-glob": "^3.3.3",
     "hexo": "^8.0.0",
