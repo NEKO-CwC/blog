@@ -4,17 +4,17 @@
 
 # Site
 title: NEKO's blogs
-subtitle: ''
-description: ''
+subtitle: ""
+description: ""
 keywords:
 author: NEKO
 language: zh-CN
-timezone: 'Asia/Shanghai'
+timezone: "Asia/Shanghai"
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
 url: http://blog.neko-cwc.com:8443/
-permalink: posts/:abbrlink/ 
+permalink: posts/:abbrlink/
 permalink_defaults:
 pretty_urls:
   trailing_index: false # Set to false to remove trailing 'index.html' from permalinks
@@ -22,10 +22,10 @@ pretty_urls:
 
 # abbrlink config
 abbrlink:
-  alg: crc32      # Algorithm used to calc abbrlink. Support crc16(default) and crc32
-  rep: hex        # Representation of abbrlink in URLs. Support dec(default) and hex
-  drafts: false   # Whether to generate abbrlink for drafts. (false in default)
-  force: false    # Enable force mode. In this mode, the plugin will ignore the cache, and calc the abbrlink for every post even it already had an abbrlink. (false in default)
+  alg: crc32 # Algorithm used to calc abbrlink. Support crc16(default) and crc32
+  rep: hex # Representation of abbrlink in URLs. Support dec(default) and hex
+  drafts: false # Whether to generate abbrlink for drafts. (false in default)
+  force: false # Enable force mode. In this mode, the plugin will ignore the cache, and calc the abbrlink for every post even it already had an abbrlink. (false in default)
   writeback: true # Whether to write changes to front-matters back to the actual markdown files. (true in default)
 
 # Directory
@@ -45,7 +45,7 @@ titlecase: false # Transform title into titlecase
 external_link:
   enable: true # Open external links in new tab
   field: site # Apply to the whole site
-  exclude: ''
+  exclude: ""
 filename_case: 0
 render_drafts: false
 post_asset_folder: true
@@ -55,20 +55,20 @@ syntax_highlighter: highlight.js
 highlight:
   line_number: true
   auto_detect: false
-  tab_replace: ''
+  tab_replace: ""
   wrap: true
   hljs: false
 prismjs:
   preprocess: true
   line_number: true
-  tab_replace: ''
+  tab_replace: ""
 
 # Home page setting
 # path: Root path for your blogs index page. (default = '')
 # per_page: Posts displayed per page. (0 = disable pagination)
 # order_by: Posts order. (Order by date descending by default)
 index_generator:
-  path: ''
+  path: ""
   per_page: 10
   order_by: -date
 
@@ -88,13 +88,12 @@ meta_generator: true
 date_format: YYYY-MM-DD
 time_format: HH:mm:ss
 ## updated_option supports 'mtime', 'date', 'empty'
-updated_option: 'github'
+updated_option: "github"
 
 # hexo-filter-date-from-git
 git_date:
   enable: true
   priority: 5
-
 
 # Pagination
 ## Set per_page to 0 to disable pagination
@@ -113,16 +112,16 @@ ignore:
 theme: redefine
 
 # _config.yml
-cdn_url: https://proxy.220181.xyz/https://cdn.blog.220181.xyz
+cdn_url: https://proxy.220181.xyz:28407/https://cdn.blog.220181.xyz
 
 deploy:
   type: r2
-  pattern: '**/*.{png,jpg,jpeg,gif,webp,svg,ico,mp4}'
+  pattern: "**/*.{png,jpg,jpeg,gif,webp,svg,ico,mp4}"
   bucket: blog-image-assets
   endpoint: https://1c3ca43dfee775f2845582d07bc4a1c9.r2.cloudflarestorage.com
   region: auto
-  aws_key: '' # Will be read from Environment Variable AWS_ACCESS_KEY_ID or similar if supported, specific plugin requires env config in CI
-  aws_secret: ''
+  aws_key: "" # Will be read from Environment Variable AWS_ACCESS_KEY_ID or similar if supported, specific plugin requires env config in CI
+  aws_secret: ""
   concurrency: 20
   delete_removed: false # Safer to keep old assets for a bit
-  prefix: '' # Upload to root
+  prefix: "" # Upload to root
