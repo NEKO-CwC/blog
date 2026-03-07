@@ -7,6 +7,23 @@ categories:
 ---
 
 
+(2026.03.07)
+
+{% notel blue V1.6.5 Feature %}
+
+- 替换 gitalk cdn
+- 替换图片 cdn 源
+
+{% endnotel %}
+
+{% notel blue V1.6.5 BLOG 修订 %}
+
+[从飞书到 Hexo 的重度自动化](https://blog.neko-cwc.com:8443/posts/a8557e90/)
+
+{% endnotel %}
+
+---
+
 (2026.02.11)
 
 {% notel purple V1.5.5 BLOG %}

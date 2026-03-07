@@ -125,6 +125,8 @@ tags:
 
 随着图文内容的积累，我发现容器镜像的体积正在变得越来越大
 
+> 如图为只差一个 blog 的前后镜像的区别
+
 {% asset_img "DMyqb89gToBj4CxbMFGcyDSYnph.png" "" %}
 
 因为我们的博客网站可能有很多的图片资源，这些图片资源一张就要 500KB，但是本来博客的内容 html 可能就只有 10+ KB。
@@ -200,39 +202,33 @@ post_asset_folder: true
 直接用 docker 起一个，然后挂个证书即可
 
 ```yaml
-# 10GB 硬盘缓存，10MB 内存索引
-# 请根据服务器磁盘空间调整 max_size
-proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=resource_cache:10m max_size=10g inactive=7d use_temp_path=off;
-
 # 指定 DNS 解析器（必须，用于解析动态提取的变量域名）
 resolver 1.1.1.1 8.8.8.8 valid=300s;
 resolver_timeout 5s;
 
 server {
-    listen 80;
-    server_name proxy.yourdomain.com; # [替换] 你的代理域名
-    return 301 https://$host$request_uri;
-}
-
-server {
-    listen 443 ssl;
-    http2 on;
-    server_name proxy.yourdomain.com; # [替换] 你的代理域名
+    listen 28407 ssl;
+    http2 on; # 开启 HTTP/2 以提升多资源加载效率
+    server_name proxy.220181.xyz; # [替换] 你的代理域名
 
     # [替换] 证书实际存放路径
-    ssl_certificate     /path/to/your/fullchain.pem; 
-    ssl_certificate_key /path/to/your/privkey.pem;
+    ssl_certificate     /etc/nginx/certs/fullchain.pem;
+    ssl_certificate_key /etc/nginx/certs/cert.key;
+
+    # SSL 安全增强配置
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:20m;
+    ssl_session_timeout 10m;
 
     # 重要：禁止合并双斜杠，确保能正确解析 URL 中的 http:// 部分
     merge_slashes off;
 
     # 正则提取：$1=协议, $t_host=域名, $t_path=路径
-    # 末尾的 ? 允许路径为空，避免请求末尾无斜杠时报 404
     location ~* ^/(https?):/+(?P<t_host>[^/]+)(?P<t_path>/.*)?$ {
         
-        # 防盗链逻辑：只允许自己的域名作为来源
-        # 移除了 none 以禁止直接在浏览器打开（视需求开启）
-        valid_referers server_names ~\.yourblog\.com; # [替换] 你的博客域名正则
+        # 防盗链逻辑：只允许特定域名引用（如博客）
+        valid_referers server_names ~\.neko-cwc\.com; # [替换] 允许访问的来源域名正则
         if ($invalid_referer) {
             return 403;
         }
@@ -242,26 +238,39 @@ server {
 
         # 核心转发逻辑
         proxy_pass $target_url;
+        proxy_http_version 1.1;
+        proxy_set_header Connection ""; # 启用长连接支持
         
-        # 动态设置 Host 头部，确保后端（如 R2/S3）能识别域名
+        # 头部透传与伪装
         proxy_set_header Host $t_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         
         # 开启 SNI 支持：解决目标站为 HTTPS 时的握手问题
         proxy_ssl_server_name on;
+        proxy_ssl_name $t_host;
         proxy_ssl_protocols TLSv1.2 TLSv1.3;
 
-        # 缓存设置
-        proxy_cache resource_cache;
-        proxy_cache_valid 200 302 30d;
+        # 高性能缓冲区调优（针对大文件处理）
+        proxy_buffer_size 512k;
+        proxy_buffers 16 512k;
+        proxy_busy_buffers_size 1m;
+        proxy_max_temp_file_size 0; # 禁用磁盘临时文件，强制内存处理
+        proxy_request_buffering off; # 禁用请求缓冲，降低延迟
+
+        # 缓存设置（使用全局 r2_cache）
+        proxy_cache r2_cache;
+        proxy_cache_valid 200 206 301 302 30d;
         proxy_cache_key $target_url;
         
-        # 在响应头中显示缓存命中状态，方便调试
-        add_header X-Cache-Status $upstream_cache_status;
-        
-        # 缓冲区调优，防止大文件处理失败
-        proxy_buffer_size 128k;
-        proxy_buffers 4 256k;
-        
+        # 调试响应头
+        add_header X-Cache-Status $upstream_cache_status always;
+        add_header X-Target-URL $target_url always;
+        add_header X-Via-Tun "sing-box" always;
+
+        # 禁用针对代理流的 Gzip，避免二次压缩开销
+        gzip off;
+
         # 浏览器缓存控制
         expires 30d;
     }
@@ -270,6 +279,109 @@ server {
     location / {
         return 404;
     }
+}
+```
+
+```yaml
+user  nginx;
+worker_processes auto;
+error_log  /var/log/nginx/error.log warn;
+pid        /var/run/nginx.pid;
+
+events {
+    # 提高单进程连接上限，适用于高并发代理场景
+    worker_connections 8192;
+    use epoll;
+    multi_accept on;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    # 基础性能优化
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+
+    # [全局缓存配置] 10GB 硬盘缓存，10MB 内存索引
+    # 对应下方 location 中的 proxy_cache r2_cache
+    proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=r2_cache:10m max_size=10g inactive=7d use_temp_path=off;
+
+    # 引入子配置文件
+    include /etc/nginx/conf.d/*.conf;
+}
+```
+
+然后记得在 `_config.yml` 里面修改，`cdn-replace.js` 会读取这个设置项进行 html 里面的资源替换
+
+```yaml
+cdn_url: https://proxy.220181.xyz:28407/https://cdn.blog.220181.xyz
+```
+
+### 更快的 r2 访问
+
+即使我们上面将图床的 cdn 链接替换成了我们的 nginx proxy cache，但是这里面还会有一个瓶颈：
+
+- **如果我们的 vps 访问 r2 也不够快怎么办**
+
+CloudFlare 还有一个功能：**Warp****。**简单的说就是一个基于 WireGuard 协议的代理客户端。能通过隧道连接到 CF 的数据中心，根据你的地理位置自动调度优选节点，降低你访问 CF 的延迟。
+
+- 如果想要白嫖使用 warp**+**，需要对应去 cf 注册一个 Zero Trust 组织（50 人内是免费的）
+
+然后正常在 warp-cli 里面登录
+
+{% asset_img "X0pOb32fAoOzXvxGmDxcZGfjn9c.png" "" %}
+
+就可以使用了
+
+{% asset_img "S4Cxb3iA0od7Uexhex4ciKo1nIg.png" "" %}
+
+看到了这里面的 `warp=plus`，就代表你现在连接到这个域名就是通过 warp 的优选 ip 了。
+
+**但是**默认情况下 warp 会作为一个**全局的透明代理**工作在你的系统里面，但是
+
+- 如果你的服务器上面的网络环境比较复杂，再套一层 tun 可能会出现各种问题
+- 或者你担心 tun 模式的虚拟网卡会影响你的服务器的网络性能
+
+> 比如我服务器上面已经有了 tailscale 和 singbox 的 tun。而且还要经常作为跳板机进行流量转发的工作。
+
+warp 可以通过设置作为一个 socks5 协议的代理节点工作在一个特定端口
+
+{% asset_img "IHJrbqQuKogGeexwrq9cbj0vnqx.png" "" %}
+
+{% asset_img "O2rcbwRMLow0nDxyYC4cxNn9nnb.png" "" %}
+
+**但是**原生 nginx 无法直接将流量转发给 SOCKS5 代理，所以我们还需要一层中间级联代理。
+
+可以用任意支持 socks5 协议的流量转发客户端进行出站节点的配置（比如我使用的就是 singbox），然后注册一个 mixed 或者 http 协议的入站节点。让 nginx 转发到这个端口或者直接依托于 tun 模式直接接管流量。
+
+```json
+{
+// 无关配置省略
+  "inbounds": [
+    {
+      "type": "mixed",
+      "tag": "mixed-in",
+      "listen": "127.0.0.1",
+      "listen_port": 20080
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "direct",
+      "tag": "direct"
+    },
+    {
+      "type": "socks",
+      "tag": "warp-out",
+      "server": "127.0.0.1",
+      "server_port": 40000
+    }
+  ],
+  "route": {
+// 无关配置省略
 }
 ```
 
