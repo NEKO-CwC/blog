@@ -1,0 +1,14 @@
+diff --git a/node_modules/hexo-filter-date-from-git/index.js b/node_modules/hexo-filter-date-from-git/index.js
+index c4aa67b..635d9c5 100644
+--- a/node_modules/hexo-filter-date-from-git/index.js
++++ b/node_modules/hexo-filter-date-from-git/index.js
+@@ -27,7 +27,8 @@ hexo.extend.filter.register('before_post_render', data => {
+ });
+ 
+ function getDate(filePath) {
+-  const date = execSync(`git log --follow --format="%ad" -- "${filePath}" | tail -1`).toString().trim();
++  const output = execSync(`git log --follow --format="%ad" -- "${filePath}"`).toString().trim();
++  const date = output ? output.split('\n').pop().trim() : '';
+   // If the file is created a moment ago, it will be an untracked file, then git can not log it
+   if (date === '') {
+     return moment();

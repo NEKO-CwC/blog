@@ -1,0 +1,13 @@
+diff --git a/node_modules/hexo-theme-redefine/layout/components/comments/gitalk.ejs b/node_modules/hexo-theme-redefine/layout/components/comments/gitalk.ejs
+index d9b1711..c8fc0fb 100644
+--- a/node_modules/hexo-theme-redefine/layout/components/comments/gitalk.ejs
++++ b/node_modules/hexo-theme-redefine/layout/components/comments/gitalk.ejs
+@@ -7,7 +7,7 @@
+ ) { %>
+     <div id="gitalk-container"></div>
+     <script <%= theme.global.single_page === true && 'data-swup-reload-script' %>
+-            src="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js"></script>
++            src="/js/gitalk.min.js"></script>
+     <script <%= theme.global.single_page === true && 'data-swup-reload-script' %>>
+ 
+         function loadGitalk() {
